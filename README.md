@@ -155,11 +155,5 @@ pip install langchain langchain-openai requests
 python examples/langchain_tool_calling_demo.py
 ```
 
-## Demo video helper script (optional)
 
-Start the API, then run:
-
-```bash
-python scripts/demo_video_walkthrough.py
-```
 
