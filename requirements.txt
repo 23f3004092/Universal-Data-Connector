@@ -1,0 +1,13 @@
+
+fastapi
+uvicorn[standard]
+pydantic>=2
+pydantic-settings
+pytest
+httpx
+
+# Optional demo scripts (not required for core API/tests):
+# openai
+# requests
+# langchain
+# langchain-openai

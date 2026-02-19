@@ -1,0 +1,65 @@
+Universal Data Connector — Written Summary (1 page)
+===================================================
+
+Overview
+--------
+I implemented a production-style FastAPI service that exposes a unified `/data` endpoint
+for three business sources: CRM customers, support tickets, and analytics metrics. The API
+is designed to be easy for LLM function/tool calling and optimized for voice/low-bandwidth
+contexts (small payloads, conservative defaults, helpful metadata).
+
+Key features delivered
+----------------------
+1) Unified connector interface
+   - A `BaseConnector` abstraction with consistent `fetch()` signatures across sources.
+   - Each connector reads mock JSON data and supports source-appropriate filters.
+
+2) Business rules + voice optimization
+   - Pagination with `page`, `page_size`, `total_pages`, `has_more`.
+   - `voice_mode=true` caps page size to a safe default for conversational contexts.
+   - Default prioritization: results are sorted by recency when `sort_by` is not provided.
+   - Optional `summarize=true` reduces payload while keeping identity/actionability fields.
+
+3) Data type identification
+   - A lightweight classifier that labels responses as tabular CRM/support or time-series.
+
+4) Freshness & staleness metadata
+   - The API returns `data_last_updated` and `data_staleness_seconds` to set user expectations.
+
+5) LLM integration examples (optional)
+   - OpenAI-style function calling demo script.
+   - LangChain tool-calling demo script.
+   - These are kept optional so core tests remain deterministic and offline.
+
+6) Production readiness
+   - Dockerfile + docker-compose for quick deployment.
+   - Consistent logging (app + uvicorn) and request logging with request IDs.
+   - Tests for connectors, business rules, and API behavior.
+
+Interesting technical decision
+------------------------------
+I separated “core product correctness” from “LLM demos”:
+- The API and tests run without any external LLM dependency.
+- Optional demo scripts show how an LLM can call the API as a tool, without making the
+  runtime or CI dependent on keys, network calls, or paid models.
+
+Challenges & solutions
+----------------------
+- Schema consistency across connectors: I standardized field names across analytics and ensured
+  filters/summarization match the dataset schema.
+- Voice-first constraints: I implemented explicit `voice_mode` and source-aware summarization so
+  the response remains actionable and not just “smaller”.
+
+What I would improve with more time
+-----------------------------------
+- Richer summarization for analytics (trend summaries, min/max/avg over a window).
+- Add caching (e.g., Redis) and rate limiting for production deployments.
+- Add authentication (API keys / JWT) and per-tenant data separation.
+- Expand data type detection and add a schema registry for stronger guarantees.
+
+What I learned
+--------------
+- Designing tool-friendly APIs benefits from strict parameter validation, consistent response
+  schemas, and metadata that clarifies what the user is seeing (pagination + freshness).
+- Voice UX isn’t only about smaller payloads; it’s about returning the most actionable fields first.
+
